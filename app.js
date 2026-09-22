@@ -287,6 +287,8 @@ function htmlToMarkdown(html){
     const inner = Array.from(n.childNodes).map(walk).join('');
     if(t === 'strong' || t === 'b') return '**'+inner+'**';
     if(t === 'em' || t === 'i') return '*'+inner+'*';
+    if(t === 's' || t === 'del') return '~~'+inner+'~~';
+    if(t === 'code') return '`'+inner+'`';
     if(t === 'a') return '['+inner+']('+(n.getAttribute('href')||'')+')';
     if(/^h[1-6]$/.test(t)) return '\n'+'#'.repeat(+t[1])+' '+inner+'\n';
     if(t === 'p') return '\n'+inner+'\n';
@@ -296,17 +298,31 @@ function htmlToMarkdown(html){
   };
   return walk(d).trim();
 }
+function parseInlineMD(s){
+  return escapeHTML(s)
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (m, txt, url) => '<a href="' + escapeHTML(url) + '">' + txt + '</a>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+    .replace(/~~([^~]+)~~/g, '<s>$1</s>');
+}
 function mdToBasicHTML(md){
   return md.split(/\n{2,}/).map(b => {
-    if(/^######\s/.test(b)) return '<h6>'+escapeHTML(b.replace(/^######\s/,''))+'</h6>';
-    if(/^#####\s/.test(b)) return '<h5>'+escapeHTML(b.replace(/^#####\s/,''))+'</h5>';
-    if(/^####\s/.test(b)) return '<h4>'+escapeHTML(b.replace(/^####\s/,''))+'</h4>';
-    if(/^### /.test(b)) return '<h3>'+escapeHTML(b.slice(4))+'</h3>';
-    if(/^## /.test(b)) return '<h2>'+escapeHTML(b.slice(3))+'</h2>';
-    if(/^# /.test(b)) return '<h1>'+escapeHTML(b.slice(2))+'</h1>';
-    if(/^> /.test(b)) return '<blockquote><p>'+escapeHTML(b.replace(/^> /gm,''))+'</p></blockquote>';
-    return '<p>'+escapeHTML(b).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>')+'</p>';
-  }).join('');
+    const trimmed = b.trim();
+    if(!trimmed) return '';
+    if(/^######\s/.test(trimmed)) return '<h6>'+parseInlineMD(trimmed.replace(/^######\s/,''))+'</h6>';
+    if(/^#####\s/.test(trimmed)) return '<h5>'+parseInlineMD(trimmed.replace(/^#####\s/,''))+'</h5>';
+    if(/^####\s/.test(trimmed)) return '<h4>'+parseInlineMD(trimmed.replace(/^####\s/,''))+'</h4>';
+    if(/^###\s/.test(trimmed)) return '<h3>'+parseInlineMD(trimmed.replace(/^###\s/,''))+'</h3>';
+    if(/^##\s/.test(trimmed)) return '<h2>'+parseInlineMD(trimmed.replace(/^##\s/,''))+'</h2>';
+    if(/^#\s/.test(trimmed)) return '<h1>'+parseInlineMD(trimmed.replace(/^#\s/,''))+'</h1>';
+    if(/^>\s/.test(trimmed)) return '<blockquote><p>'+parseInlineMD(trimmed.replace(/^>\s/gm,''))+'</p></blockquote>';
+    if(/^[*-]\s/.test(trimmed)){
+      const items = trimmed.split('\n').map(l => '<li>'+parseInlineMD(l.replace(/^[*-]\s/,''))+'</li>').join('');
+      return '<ul>'+items+'</ul>';
+    }
+    return '<p>'+parseInlineMD(trimmed).replace(/\n/g,'<br>')+'</p>';
+  }).filter(Boolean).join('');
 }
 function download(name, content, type){
   const a = document.createElement('a');
@@ -327,6 +343,7 @@ function telegraphNodes(html){
     if(!allow.has(tag)) return Array.from(el.childNodes).map(conv).flat().filter(Boolean);
     const node = {tag};
     if(tag === 'a') node.attrs = {href: el.getAttribute('href') || ''};
+    if(tag === 'img' || tag === 'iframe' || tag === 'video') node.attrs = {src: el.getAttribute('src') || ''};
     const children = Array.from(el.childNodes).map(conv).flat().filter(v => v !== null && v !== '');
     if(children.length) node.children = children;
     return node;
@@ -361,8 +378,8 @@ function toRichHTML(root){
       blocks.push(exp ? '<blockquote expandable>'+inner+'</blockquote>' : '<blockquote>'+inner+'</blockquote>');
     } else if(t==='ul'||t==='ol'){
       blocks.push('<'+t+'>'+Array.from(n.children).map(li => '<li>'+inline(li)+'</li>').join('')+'</'+t+'>');
-    } else if(t==='pre') blocks.push('<pre>'+escapeHTML(n.innerText)+'</pre>');
-    else if(t==='table') blocks.push('<p>'+escapeHTML(n.innerText.replace(/\s+/g,' ').trim())+'</p>');
+    } else if(t==='pre') blocks.push('<pre>'+escapeHTML(n.textContent||'')+'</pre>');
+    else if(t==='table') blocks.push('<p>'+escapeHTML((n.textContent||'').replace(/\s+/g,' ').trim())+'</p>');
     else blocks.push('<p>'+inner+'</p>');
   });
   return blocks.join('') || '<p></p>';
