@@ -61,7 +61,6 @@
         --shadow: 0 14px 34px rgba(0, 0, 0, .30);
         --shadow-active: 0 8px 22px rgba(0, 0, 0, .26);
       }
-    }
 
     *,
     *::before,
@@ -69,29 +68,27 @@
       box-sizing: border-box;
     }
 
-    html {
+    html,
+    body {
+      margin: 0;
+      inline-size: 100%;
       min-block-size: 100%;
+    }
+
+    html {
+      background: var(--bg-base);
     }
 
     body {
-      margin: 0;
-      min-inline-size: 100%;
-      min-block-size: 100%;
+      min-block-size: 100dvh;
       color: var(--ink);
-      background: transparent;
+      background: var(--bg-base);
       -webkit-tap-highlight-color: transparent;
     }
 
-    /*
-      Fundo independente do layout:
-      - não mede nem posiciona a interface;
-      - não recebe eventos;
-      - ultrapassa a viewport para permanecer contínuo em resize/rotação;
-      - ocupa uma camada própria atrás do app.
-    */
     .ambient-background {
       position: fixed;
-      inset: -14vmax;
+      inset: 0;
       z-index: 0;
       pointer-events: none;
       background:
@@ -132,10 +129,7 @@
       color: inherit;
     }
 
-    /*
-      UX em fluxo normal.
-      O browser pode alterar a altura visível; o grid apenas recebe a nova área.
-    */
+  
     .app {
       position: relative;
       z-index: 1;
