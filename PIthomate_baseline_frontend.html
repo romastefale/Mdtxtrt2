@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <title>PIthomate</title>
+
+  <style>
+    :root {
+      --bg-base: #fbfcfe;
+      --bg-warm: rgba(255, 211, 154, .20);
+      --bg-rose: rgba(255, 174, 205, .18);
+      --bg-violet: rgba(193, 184, 255, .14);
+      --bg-blue: rgba(150, 206, 255, .16);
+      --bg-cyan: rgba(143, 230, 239, .14);
+
+      --ink: #263243;
+      --muted: #718096;
+
+      --glass: rgba(255, 255, 255, .72);
+      --glass-active: rgba(255, 255, 255, .94);
+      --glass-edge: rgba(255, 255, 255, .50);
+
+      --shadow: 0 10px 28px rgba(52, 68, 92, .085);
+      --shadow-active: 0 7px 18px rgba(52, 68, 92, .075);
+
+      --control: 46px;
+      --search-height: 50px;
+      --side-space: clamp(14px, 3.5vw, 24px);
+      --top-space: max(16px, env(safe-area-inset-top));
+      --bottom-space: max(16px, env(safe-area-inset-bottom));
+      --ease: 180ms cubic-bezier(.2, .8, .2, 1);
+
+      font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-base: #0b0c0f;
+        --bg-warm: rgba(255, 166, 95, .075);
+        --bg-rose: rgba(255, 103, 164, .070);
+        --bg-violet: rgba(154, 128, 255, .080);
+        --bg-blue: rgba(89, 157, 255, .080);
+        --bg-cyan: rgba(76, 211, 222, .065);
+
+        --ink: #f4f4f5;
+        --muted: #a1a1aa;
+
+        --glass: rgba(255, 255, 255, .075);
+        --glass-active: rgba(255, 255, 255, .135);
+        --glass-edge: rgba(255, 255, 255, .10);
+
+        --shadow: 0 14px 34px rgba(0, 0, 0, .30);
+        --shadow-active: 0 8px 22px rgba(0, 0, 0, .26);
+      }
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-block-size: 100%;
+    }
+
+    body {
+      margin: 0;
+      min-inline-size: 100%;
+      min-block-size: 100%;
+      color: var(--ink);
+      background: transparent;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /*
+      Fundo independente do layout:
+      - não mede nem posiciona a interface;
+      - não recebe eventos;
+      - ultrapassa a viewport para permanecer contínuo em resize/rotação;
+      - ocupa uma camada própria atrás do app.
+    */
+    .ambient-background {
+      position: fixed;
+      inset: -14vmax;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(
+          ellipse 78% 58% at 26% 8%,
+          var(--bg-warm) 0%,
+          transparent 72%
+        ),
+        radial-gradient(
+          ellipse 72% 54% at 28% 34%,
+          var(--bg-rose) 0%,
+          transparent 73%
+        ),
+        radial-gradient(
+          ellipse 68% 55% at 50% 42%,
+          var(--bg-violet) 0%,
+          transparent 74%
+        ),
+        radial-gradient(
+          ellipse 78% 62% at 73% 59%,
+          var(--bg-blue) 0%,
+          transparent 75%
+        ),
+        radial-gradient(
+          ellipse 72% 58% at 82% 70%,
+          var(--bg-cyan) 0%,
+          transparent 76%
+        ),
+        var(--bg-base);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      color: inherit;
+    }
+
+    /*
+      UX em fluxo normal.
+      O browser pode alterar a altura visível; o grid apenas recebe a nova área.
+    */
+    .app {
+      position: relative;
+      z-index: 1;
+      inline-size: 100%;
+      min-block-size: 100dvh;
+      padding:
+        var(--top-space)
+        var(--side-space)
+        var(--bottom-space);
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      row-gap: 16px;
+    }
+
+    .glass {
+      background: var(--glass);
+      border: 1px solid var(--glass-edge);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(20px) saturate(125%);
+      -webkit-backdrop-filter: blur(20px) saturate(125%);
+    }
+
+    .top {
+      min-inline-size: 0;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      column-gap: 12px;
+    }
+
+    .top > :first-child {
+      justify-self: start;
+    }
+
+    .top > :last-child {
+      justify-self: end;
+    }
+
+    .round {
+      inline-size: var(--control);
+      block-size: var(--control);
+      padding: 0;
+      border: 1px solid var(--glass-edge);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--glass);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(20px) saturate(125%);
+      -webkit-backdrop-filter: blur(20px) saturate(125%);
+      cursor: pointer;
+      transition:
+        transform var(--ease),
+        background var(--ease);
+    }
+
+    .round:hover {
+      background: var(--glass-active);
+    }
+
+    .round:active {
+      transform: scale(.97);
+    }
+
+    .round svg {
+      inline-size: 21px;
+      block-size: 21px;
+    }
+
+    .material-icon {
+      fill: currentColor;
+      stroke: none;
+    }
+
+    .more-dots {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .more-dots i {
+      inline-size: 4px;
+      block-size: 4px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .tabs {
+      min-inline-size: 0;
+      padding: 4px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+    }
+
+    .tab {
+      min-inline-size: 38px;
+      block-size: 38px;
+      padding-inline: 10px;
+      border: 0;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+      transition:
+        color var(--ease),
+        background var(--ease),
+        box-shadow var(--ease),
+        padding var(--ease),
+        gap var(--ease),
+        transform var(--ease);
+    }
+
+    .tab svg {
+      inline-size: 18px;
+      block-size: 18px;
+      flex: none;
+    }
+
+    .tab-label {
+      inline-size: 0;
+      max-inline-size: 0;
+      overflow: hidden;
+      opacity: 0;
+      white-space: nowrap;
+      font-size: 14px;
+      font-weight: 650;
+      transition:
+        max-inline-size var(--ease),
+        opacity var(--ease);
+    }
+
+    .tab.is-active {
+      padding-inline: 12px 16px;
+      gap: 8px;
+      color: var(--ink);
+      background: var(--glass-active);
+      box-shadow: var(--shadow-active);
+    }
+
+    .tab.is-active .tab-label {
+      inline-size: auto;
+      max-inline-size: 96px;
+      opacity: 1;
+    }
+
+    .tab:active {
+      transform: scale(.98);
+    }
+
+    .stage {
+      min-inline-size: 0;
+      min-block-size: 0;
+      overflow: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: none;
+    }
+
+    .stage::-webkit-scrollbar {
+      display: none;
+    }
+
+    .bottom {
+      min-inline-size: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .search {
+      min-inline-size: 0;
+      block-size: var(--search-height);
+      padding-inline: 18px;
+      border: 1px solid var(--glass-edge);
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--glass-active);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(20px) saturate(125%);
+      -webkit-backdrop-filter: blur(20px) saturate(125%);
+    }
+
+    .search svg {
+      inline-size: 19px;
+      block-size: 19px;
+      flex: none;
+      fill: none;
+      stroke: var(--muted);
+      stroke-width: 1.85;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .search input {
+      inline-size: 100%;
+      min-inline-size: 0;
+      padding: 0;
+      border: 0;
+      outline: 0;
+      color: var(--ink);
+      background: transparent;
+      font-size: 15px;
+    }
+
+    .search input::placeholder {
+      color: var(--muted);
+      opacity: .82;
+    }
+
+    .add {
+      inline-size: var(--search-height);
+      block-size: var(--search-height);
+    }
+
+    .add svg {
+      inline-size: 22px;
+      block-size: 22px;
+    }
+
+    @media (max-width: 420px) {
+      :root {
+        --side-space: 14px;
+      }
+
+      .top {
+        column-gap: 8px;
+      }
+
+      .tab {
+        min-inline-size: 34px;
+        padding-inline: 8px;
+      }
+
+      .tab.is-active {
+        padding-inline: 10px 13px;
+        gap: 6px;
+      }
+
+      .tab svg {
+        inline-size: 17px;
+        block-size: 17px;
+      }
+
+      .tab-label {
+        font-size: 13px;
+      }
+    }
+}
+  </style>
+</head>
+
+<body>
+  <div class="ambient-background"></div>
+
+  <main class="app">
+    <header class="top">
+      <button class="round" type="button">
+        <svg class="material-icon" viewBox="0 -960 960 960"><path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z"/></svg>
+      </button>
+
+      <nav class="tabs glass">
+        <button
+          class="tab is-active"
+          type="button"
+          data-tab="projects"
+        >
+          <svg class="material-icon" viewBox="0 -960 960 960"><path d="M160-240v-480 520-40Zm0 80q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h240l80 80h320q33 0 56.5 23.5T880-640v200h-80v-200H447l-80-80H160v480h200v80H160ZM584-56 440-200l144-144 56 57-87 87 87 87-56 57Zm192 0-56-57 87-87-87-87 56-57 144 144L776-56Z"/></svg>
+          <span class="tab-label">Projects</span>
+        </button>
+
+        <button
+          class="tab"
+          type="button"
+          data-tab="repos"
+        >
+          <svg class="material-icon" viewBox="0 -960 960 960"><path d="M373.5-103.5Q330-147 330-210q0-52 31-91.5t79-53.5v-85H200v-160H100v-280h280v280H280v80h400v-85q-48-14-79-53.5T570-750q0-63 43.5-106.5T720-900q63 0 106.5 43.5T870-750q0 52-31 91.5T760-605v165H520v85q48 14 79 53.5t31 91.5q0 63-43.5 106.5T480-60q-63 0-106.5-43.5Zm396-597Q790-721 790-750t-20.5-49.5Q749-820 720-820t-49.5 20.5Q650-779 650-750t20.5 49.5Q691-680 720-680t49.5-20.5ZM180-680h120v-120H180v120Zm349.5 519.5Q550-181 550-210t-20.5-49.5Q509-280 480-280t-49.5 20.5Q410-239 410-210t20.5 49.5Q451-140 480-140t49.5-20.5ZM240-740Zm480-10ZM480-210Z"/></svg>
+          <span class="tab-label">Repos</span>
+        </button>
+
+        <button
+          class="tab"
+          type="button"
+          data-tab="history"
+        >
+          <svg class="material-icon" viewBox="0 -960 960 960"><path d="M480-120q-138 0-240.5-91.5T122-440h82q14 104 92.5 172T480-200q117 0 198.5-81.5T760-480q0-117-81.5-198.5T480-760q-69 0-129 32t-101 88h110v80H120v-240h80v94q51-64 124.5-99T480-840q75 0 140.5 28.5t114 77q48.5 48.5 77 114T840-480q0 75-28.5 140.5t-77 114q-48.5 48.5-114 77T480-120Zm112-192L440-464v-216h80v184l128 128-56 56Z"/></svg>
+          <span class="tab-label">History</span>
+        </button>
+      </nav>
+
+      <button class="round" type="button">
+        <span class="more-dots"><i></i><i></i><i></i></span>
+      </button>
+    </header>
+
+    <section class="stage"></section>
+
+    <form class="bottom" id="searchForm">
+      <label class="search">
+        <svg viewBox="0 0 24 24">
+          <circle cx="10.5" cy="10.5" r="6.5"></circle>
+          <path d="m16 16 5 5"></path>
+        </svg>
+        <input type="search" placeholder="Search">
+      </label>
+
+      <button class="round add" type="button">
+        <svg class="material-icon" viewBox="0 -960 960 960"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>
+      </button>
+    </form>
+  </main>
+
+  <script>
+    (() => {
+      const tabs = [...document.querySelectorAll('.tab')];
+
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(item => item.classList.toggle('is-active', item === tab));
+        });
+      });
+
+      document.querySelector('#searchForm').addEventListener('submit', event => {
+        event.preventDefault();
+      });
+    })();
+  </script>
+</body>
+</html>
