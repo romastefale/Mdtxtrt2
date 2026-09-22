@@ -31,6 +31,17 @@
       --glass-edge:transparent;
       --glass-shadow:inset 0 .5px 0 rgba(255,255,255,.12),0 1px 2px rgba(0,0,0,.16),0 6px 18px rgba(0,0,0,.14),0 18px 40px rgba(0,0,0,.1);
       --glass-shadow-lg:inset 0 .5px 0 rgba(255,255,255,.14),0 2px 6px rgba(0,0,0,.14),0 12px 28px rgba(0,0,0,.16),0 28px 56px rgba(0,0,0,.12);
+      --surface-glass-low:rgba(255,255,255,0.58);
+      --surface-glass-default:rgba(255,255,255,0.72);
+      --surface-glass-high:rgba(255,255,255,0.86);
+      --surface-glass-active:rgba(255,247,237,0.88);
+      --surface-glass-border:rgba(255,255,255,0.60);
+      --surface-glass-highlight:inset 0 1px 0 rgba(255,255,255,0.80);
+      --elevation-0:none;
+      --elevation-1:0 2px 8px -2px rgba(15,23,42,0.05),0 1px 2px rgba(15,23,42,0.03);
+      --elevation-2:0 8px 24px -4px rgba(15,23,42,0.07),0 3px 8px -1px rgba(15,23,42,0.04);
+      --elevation-3:0 16px 36px -6px rgba(15,23,42,0.10),0 4px 12px -2px rgba(15,23,42,0.05);
+      --elevation-pill:0 10px 30px -4px rgba(234,88,12,0.09),0 3px 8px -1px rgba(15,23,42,0.04);
       --safe-top:env(safe-area-inset-top,0px);
       --safe-bottom:env(safe-area-inset-bottom,0px);
       --tg-top:0px;
@@ -67,13 +78,13 @@
     html.light{color-scheme:light}
     html.dark{color-scheme:dark}
     *{box-sizing:border-box}
-    html,body{margin:0;width:100%;height:100%;min-height:100%;min-height:100dvh;touch-action:pan-x pan-y;-ms-touch-action:pan-x pan-y;accent-color:var(--accent);caret-color:var(--accent);background:none}
+    html,body{margin:0;width:100%;height:100%;min-height:100%;min-height:100vh;min-height:100dvh;touch-action:pan-x pan-y;-ms-touch-action:pan-x pan-y;accent-color:var(--accent);caret-color:var(--accent);background:none}
     body{
       padding:0!important;color:var(--text);
       font:16px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
       overflow:hidden;
     }
-    .wash{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+    .wash{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:hidden}
     .wash iframe{position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none}
     .wash-light{opacity:0}
     .wash-dark{opacity:1}
@@ -108,8 +119,8 @@
       background:var(--glass);
       border:0;
       box-shadow:var(--glass-shadow);
-      backdrop-filter:url(#frosted);
-      -webkit-backdrop-filter:blur(20px) saturate(var(--glass-saturation,1.15));
+      -webkit-backdrop-filter:blur(24px) saturate(var(--glass-saturation,1.15));
+      backdrop-filter:blur(24px) saturate(var(--glass-saturation,1.15));
     }
     .glass-surface__filter{position:absolute;width:0;height:0;overflow:hidden;pointer-events:none}
     .app{
@@ -202,11 +213,16 @@
       z-index:40;width:max-content;max-width:calc(100vw - 28px);
       max-height:calc(var(--vv-h, 100dvh) - var(--bar-h) - 24px);
       overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;
-      display:none;padding:8px;border:1px solid color-mix(in srgb,var(--text) 12%,transparent);border-radius:30px;
-      color:var(--text);background:color-mix(in srgb,var(--bg) 92%,transparent);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 4px 14px rgba(0,0,0,.18),0 22px 48px rgba(0,0,0,.28);
-      -webkit-backdrop-filter:none;backdrop-filter:none;
+      display:none;padding:8px;border:1px solid rgba(255,255,255,.62);border-radius:28px;
+      color:var(--text);background:rgba(255,255,255,.76);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.85), 0 8px 28px -4px rgba(15,23,42,.12), 0 20px 48px -8px rgba(15,23,42,.08);
+      -webkit-backdrop-filter:blur(28px) saturate(1.8);backdrop-filter:blur(28px) saturate(1.8);
       transform-origin:var(--sheet-origin,50%) 100%;animation:sheet-in .16s cubic-bezier(.2,.75,.25,1)
+    }
+    html.dark .sheet{
+      background:rgba(22,23,34,.78);
+      border-color:rgba(255,255,255,.14);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 12px 36px rgba(0,0,0,.38);
     }
     .sheet.is-top{
       bottom:auto;top:var(--sheet-top,72px);
@@ -221,7 +237,6 @@
     .sheet-ico{width:42px;height:42px;border-radius:50%;flex:none;display:grid;place-items:center;background:color-mix(in srgb,var(--text) 11%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
     .sheet-ico .ui-icon,.sheet-ico svg{width:20px;height:20px}
     .sheet.on{display:block}
-    .sheet.frost{-webkit-backdrop-filter:none;backdrop-filter:none}
     .sheet h3{margin:6px 8px 10px;font-size:17px}
     .sheet p,.hint{margin:0 8px 12px;font-size:13px;color:var(--muted)}
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
