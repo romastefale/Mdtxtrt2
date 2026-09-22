@@ -1,0 +1,6 @@
+{
+  "name": "MDTXTRT",
+  "description": "Markdown to rich text and Telegram/Telegraph editor",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

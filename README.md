@@ -1,11 +1,28 @@
-<div align="center">
+# MDTXTRT
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+Você escreve uma vez.
+O mesmo texto vira mensagem no Telegram e página no Telegraph.
 
-  <h1>Built with AI Studio</h2>
+No Telegram, acompanha o tema do app.
+No navegador, acompanha o claro ou o escuro do sistema.
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+## Premissa
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+Um só rascunho. Dois destinos.
+Sem reescrever. Sem formatar de novo.
 
-</div>
+Entra texto simples ou Markdown.
+Sai mensagem rica no chat, ou página pública no Telegraph.
+
+## O que dá para fazer
+
+- Títulos, corpo, listas, links e citações
+- Tarefa, tabela, citação longa, documento e botões
+- Importar e exportar TXT e Markdown
+- Publicar no Telegraph
+- Enviar ao Telegram quando o editor está aberto pelo bot
+
+## Abrir
+
+- [Editor](https://romastefale.github.io/MDTXTRT/)
+- [@mdtxtrtbot](https://t.me/mdtxtrtbot)

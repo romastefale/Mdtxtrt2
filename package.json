@@ -1,0 +1,13 @@
+{
+  "name": "mdtxtrt",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.mjs",
+    "build": "node -e 'process.exit(0)'",
+    "start": "node server.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
