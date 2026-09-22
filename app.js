@@ -26,8 +26,8 @@ function applyIcon(el, url){
   else el.classList.remove('is-bitmap');
 }
 function setWash(kind, url){
-  const el = document.querySelector('.wash-' + kind);
-  if(el && url && el.tagName === 'IFRAME') el.src = url;
+  const el = document.querySelector('iframe.wash-' + kind);
+  if(el && url) el.src = url;
 }
 function applyFolderManifest(man){
   $$('[data-icon]').forEach(el => {
